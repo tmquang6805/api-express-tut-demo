@@ -39,3 +39,29 @@ router.post('/', function (req, res, next) {
   })
 
 });
+
+router.post('/login', function (req, res, next) {
+
+  var email = req.body.email,
+    password = req.body.password;
+
+  if (!email || !validator.isEmail(email)) {
+    var error = new Error('Email is required or is invalid email format');
+    error.status = 400;
+    return next(error);
+  }
+
+  if (!password) {
+    var error = new Error('Password is required');
+    error.status = 400;
+    return next(error);
+  }
+
+  userService.login(email, password, function (error, isSuccess) {
+    if (error) {
+      return next(error);
+    }
+    return res.json({message: isSuccess ? "Successful" : "Fail"});
+  });
+
+});
