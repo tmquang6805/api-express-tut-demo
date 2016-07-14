@@ -6,7 +6,7 @@ module.exports = function (sequelize) {
   return {
     addNewUser: function (user, cb) {
       User.create(user)
-        .then(function(instance){
+        .then(function (instance) {
           return cb(null, _.clone(instance.dataValues));
         })
         .catch(function (error) {
@@ -14,22 +14,51 @@ module.exports = function (sequelize) {
         });
     },
     login: function (email, password, cb) {
-      User.findOne({
-        where: {email: email}
-      })
+      var isSuccessful = true;
+      User
+        .findOne({
+          where: {email: email}
+        })
         .then(function (instance) {
           if (!instance) {
             return cb(null, false);
           }
           var user = _.clone(instance.dataValues);
           if (user.password !== password) {
-            return cb(null, false);
+            isSuccessful = false;
+            return;
           }
-          return cb(null, true);
+          instance.last_logged_in = sequelize.fn('NOW');
+          return instance.save({silent: true});
+        })
+        .then(function () {
+          return cb(null, isSuccessful);
         })
         .catch(function (error) {
           return cb(error);
         });
+    },
+
+    changePassword: function (email, oldPassword, newPassword, cb) {
+      var service = this;
+      service.login(email, oldPassword, function (error, isSuccessful) {
+        if (error) {
+          return cb(error);
+        }
+        if (!isSuccessful) {
+          return cb(new Error('Cannot change password'));
+        }
+        User
+          .update({password: newPassword}, {where: {email: email}, logging: function (sql) {
+            console.log(sql);
+          }})
+          .then(function () {
+            return cb(null, true);
+          })
+          .catch(function (error) {
+            return cb(error);
+          });
+      });
     }
   }
 };

@@ -65,3 +65,30 @@ router.post('/login', function (req, res, next) {
   });
 
 });
+
+router.put('/change-password', function (req, res, next) {
+
+  var email = req.body.email,
+    oldPassword = req.body.old_password,
+    newPassword = req.body.new_password;
+
+  if (!email || !validator.isEmail(email)) {
+    var error = new Error('Email is required or is invalid email format');
+    error.status = 400;
+    return next(error);
+  }
+
+  if (!oldPassword || !newPassword) {
+    var error = new Error('Password is required');
+    error.status = 400;
+    return next(error);
+  }
+
+  userService.changePassword(email, oldPassword, newPassword, function(error, isSuccess){
+    if (error) {
+      return next(error);
+    }
+    return res.json({message: isSuccess ? "Successful" : "Fail"});
+  });
+
+});
