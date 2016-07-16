@@ -38,7 +38,6 @@ module.exports = function (sequelize) {
           return cb(error);
         });
     },
-
     changePassword: function (email, oldPassword, newPassword, cb) {
       var service = this;
       service.login(email, oldPassword, function (error, isSuccessful) {
@@ -59,6 +58,18 @@ module.exports = function (sequelize) {
             return cb(error);
           });
       });
+    },
+    removeUserById: function (id, cb) {
+      User
+        .destroy({where: {id: id}, logging: function (sql) {
+          console.log(sql);
+        }})
+        .then(function (number) {
+          return number ? cb(null, true) : cb(null, false);
+        })
+        .catch(function (error) {
+          return cb(error);
+        });
     }
   }
 };

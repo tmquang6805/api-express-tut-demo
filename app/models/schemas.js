@@ -14,6 +14,7 @@ module.exports = function (sequelize) {
     status: {type: Sequelize.BOOLEAN, defaultValue: true}
   }, {
     timestamps: true,
+    paranoid: true,
     underscored: true,
     tableName: 'users'
   });

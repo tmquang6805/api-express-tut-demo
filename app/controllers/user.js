@@ -40,6 +40,16 @@ router.post('/', function (req, res, next) {
 
 });
 
+router.delete('/:id', function (req, res, next) {
+  userService.removeUserById(req.params.id, function (error, isDeleted) {
+    if (error) {
+      return next(error);
+    }
+
+    return res.json({message: "Successful", isDeleted: isDeleted});
+  });
+});
+
 router.post('/login', function (req, res, next) {
 
   var email = req.body.email,
